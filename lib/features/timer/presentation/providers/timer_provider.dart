@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mindfulness_bell/core/audio/audio_handler.dart';
 import 'package:mindfulness_bell/core/background/background_service.dart';
-import 'package:mindfulness_bell/core/services/notification_service.dart';
 import 'package:mindfulness_bell/features/timer/domain/entities/bell_option.dart';
 import 'package:mindfulness_bell/features/timer/domain/entities/timer_settings.dart';
 import 'package:mindfulness_bell/features/timer/domain/repositories/timer_repository.dart';
@@ -10,7 +9,6 @@ import 'package:mindfulness_bell/features/timer/domain/repositories/timer_reposi
 class TimerProvider with ChangeNotifier {
   final TimerRepository _timerRepository;
   final AudioPlayerHandler audioHandler;
-  final NotificationService _notificationService;
 
   TimerSettings? _settings;
   TimerSettings? _originalSettings; // Store original settings for cancel
@@ -23,11 +21,7 @@ class TimerProvider with ChangeNotifier {
     BellOption('Gong', 'assets/sounds/gong.mp3'),
   ];
 
-  TimerProvider(
-    this._timerRepository, {
-    required this.audioHandler,
-    required NotificationService notificationService,
-  }) : _notificationService = notificationService {
+  TimerProvider(this._timerRepository, {required this.audioHandler}) {
     _loadSettings();
   }
 
@@ -141,15 +135,9 @@ class TimerProvider with ChangeNotifier {
     _isRunning = true;
 
     // Use the repository's simple timer approach
-    _timerRepository.startTimer(_settings ?? TimerSettings()).listen((
-      duration,
-    ) {
-      // Bell was triggered, show notification
-      _notificationService.showNotification(
-        title: 'Mindfulness Bell',
-        body: 'Time to be present and mindful',
-      );
-    });
+    _timerRepository
+        .startTimer(_settings ?? TimerSettings())
+        .listen((duration) {});
 
     // Start background service to keep timer alive when app is closed
     await BackgroundService.startKeepAlive();
@@ -176,7 +164,6 @@ class TimerProvider with ChangeNotifier {
   void dispose() {
     _timerRepository.dispose();
     audioHandler.dispose();
-    _notificationService.cancelAllNotifications();
     super.dispose();
   }
 }

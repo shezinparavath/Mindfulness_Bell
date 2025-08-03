@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 // This class handles basic audio playback
@@ -108,9 +109,9 @@ class AudioPlayerHandler extends BaseAudioHandler {
       }
       await _player.setVolume(_volume);
       await play();
-      print('[$_tag] Playing sound: $assetPath at volume $_volume');
+      debugPrint('[$_tag] Playing sound: $assetPath at volume $_volume');
     } catch (e, stackTrace) {
-      print('[$_tag] Error playing sound: $e\n$stackTrace');
+      debugPrint('[$_tag] Error playing sound: $e\n$stackTrace');
       rethrow;
     }
   }
@@ -118,9 +119,9 @@ class AudioPlayerHandler extends BaseAudioHandler {
   Future<void> dispose() async {
     try {
       await _player.dispose();
-      print('[$_tag] Audio player disposed');
+      debugPrint('[$_tag] Audio player disposed');
     } catch (e, stackTrace) {
-      print('[$_tag] Error disposing audio player: $e\n$stackTrace');
+      debugPrint('[$_tag] Error disposing audio player: $e\n$stackTrace');
       rethrow;
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mindfulness_bell/features/timer/domain/entities/timer_settings.dart';
@@ -16,7 +17,7 @@ void callbackDispatcher() {
       }
       return true;
     } catch (e, stackTrace) {
-      print('Error in callbackDispatcher: $e\n$stackTrace');
+      debugPrint('Error in callbackDispatcher: $e\n$stackTrace');
       return false;
     }
   });
@@ -27,7 +28,7 @@ AudioPlayerHandler? _audioHandler;
 
 Future<void> _handleKeepAliveTask() async {
   try {
-    print('Background service keeping timer alive...');
+    debugPrint('Background service keeping timer alive...');
 
     // Initialize audio handler for background task
     _audioHandler = AudioPlayerHandler();
@@ -52,12 +53,13 @@ Future<void> _handleKeepAliveTask() async {
         final now = DateTime.now();
 
         if (nextBellMillis != null) {
-          DateTime nextBellTime =
-              DateTime.fromMillisecondsSinceEpoch(nextBellMillis);
+          DateTime nextBellTime = DateTime.fromMillisecondsSinceEpoch(
+            nextBellMillis,
+          );
 
           // Catch up on all missed bells
           while (!now.isBefore(nextBellTime)) {
-            print(
+            debugPrint(
               'Bell due at $nextBellTime — playing sound: $bellSound at volume ${settings.volume}',
             );
 
@@ -65,7 +67,8 @@ Future<void> _handleKeepAliveTask() async {
             await _audioHandler!.playSound(bellSound);
 
             final audioDuration =
-                await _audioHandler!.durationStream.first ?? Duration(seconds: 30);
+                await _audioHandler!.durationStream.first ??
+                Duration(seconds: 30);
             final safeTimeout = audioDuration + const Duration(seconds: 5);
 
             await _audioHandler!.playerStateStream
@@ -75,7 +78,8 @@ Future<void> _handleKeepAliveTask() async {
                 )
                 .timeout(
                   safeTimeout,
-                  onTimeout: () => PlayerState(false, ProcessingState.completed),
+                  onTimeout: () =>
+                      PlayerState(false, ProcessingState.completed),
                 );
 
             // Move to the next scheduled bell time
@@ -91,25 +95,25 @@ Future<void> _handleKeepAliveTask() async {
       }
     }
   } catch (e, stackTrace) {
-    print('Error in background task: $e\n$stackTrace');
+    debugPrint('Error in background task: $e\n$stackTrace');
   } finally {
-    print('Cleaning up background resources...');
+    debugPrint('Cleaning up background resources...');
     if (_audioHandler != null) {
       try {
         await _audioHandler!.stop();
         await _audioHandler!.dispose();
       } catch (e) {
-        print('Error during cleanup: $e');
+        debugPrint('Error during cleanup: $e');
       }
       _audioHandler = null;
     }
-    print('Background task completed');
+    debugPrint('Background task completed');
   }
 }
 
 class BackgroundService {
   static Future<void> initialize() async {
-    await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+    await Workmanager().initialize(callbackDispatcher);
   }
 
   static Future<void> startKeepAlive() async {

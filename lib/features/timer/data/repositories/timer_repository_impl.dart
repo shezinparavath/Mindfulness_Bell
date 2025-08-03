@@ -7,7 +7,6 @@ import '../../domain/entities/timer_settings.dart';
 import '../../domain/repositories/timer_repository.dart';
 import '../../../../core/audio/audio_handler.dart';
 import '../../../../core/utils/util_functions.dart';
-import '../../../../core/services/notification_service.dart';
 
 class TimerRepositoryImpl implements TimerRepository {
   Timer? _timer;
@@ -51,7 +50,7 @@ class TimerRepositoryImpl implements TimerRepository {
         _currentSettings = TimerSettings.fromJson(settingsMap);
         return _currentSettings!;
       } catch (e) {
-        print('Error loading settings: $e');
+        debugPrint('Error loading settings: $e');
       }
     }
 
@@ -135,18 +134,8 @@ class TimerRepositoryImpl implements TimerRepository {
           bellOptions[_currentSettings!.selectedBellIndex],
         );
 
-        // Show notification with stop button
-        final notificationService = NotificationService();
-        await notificationService.showBellPlayingNotification(
-          title: 'Mindfulness Bell',
-          body: 'Time to be present and mindful',
-          onStopPressed: () async {
-            await _audioHandler.stop();
-            await notificationService.cancelBellPlayingNotification();
-          },
-        );
       } catch (e) {
-        print('Error playing bell sound: $e');
+        debugPrint('Error playing bell sound: $e');
       }
     }
   }

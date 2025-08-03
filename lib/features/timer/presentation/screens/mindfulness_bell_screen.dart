@@ -165,23 +165,31 @@ class _MindfulnessBellScreenState extends State<_MindfulnessBellScreenContent> {
   }
 
   void _saveBellSettings() async {
-    // Settings are automatically saved when changed through the provider
+    // Store context before any async operations
+    final currentContext = context;
+    if (!mounted) return;
+
     HapticFeedback.mediumImpact();
     await _timerProvider.saveSettings();
-    if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-          'Bell settings saved successfully!',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+    if (!mounted) return;
+
+    if (currentContext.mounted) {
+      ScaffoldMessenger.of(currentContext).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Bell settings saved successfully!',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: const Color(0xFF8B5CF6),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
         ),
-        backgroundColor: const Color(0xFF8B5CF6),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+      );
+    }
   }
 
   void _playSoundPreview(int index) {
@@ -202,7 +210,7 @@ class _MindfulnessBellScreenState extends State<_MindfulnessBellScreenContent> {
   }
 
   void _showBellPreviewDialog(BuildContext context, BellOption bellSound) {
-    print('Showing preview for: ${bellSound.name}');
+    debugPrint('Showing preview for: ${bellSound.name}');
 
     // Stop any currently playing audio first
     _timerProvider.stopAudio();
@@ -265,7 +273,7 @@ class _MindfulnessBellScreenState extends State<_MindfulnessBellScreenContent> {
                   // Close button
                   ElevatedButton(
                     onPressed: () {
-                      print('Close button pressed for: ${bellSound.name}');
+                      debugPrint('Close button pressed for: ${bellSound.name}');
                       // Stop the audio and close dialog
                       _timerProvider.stopAudio();
                       Navigator.of(context).pop();
@@ -289,7 +297,7 @@ class _MindfulnessBellScreenState extends State<_MindfulnessBellScreenContent> {
 
     // Stop audio when dialog is dismissed
     _timerProvider.stopAudio();
-    print('Dialog closed for: ${bellSound.name}');
+    debugPrint('Dialog closed for: ${bellSound.name}');
   }
 
   @override

@@ -5,7 +5,6 @@ import 'package:mindfulness_bell/features/timer/presentation/screens/mindfulness
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/audio/audio_handler.dart';
-import 'core/services/notification_service.dart';
 import 'features/timer/presentation/providers/timer_provider.dart';
 import 'features/timer/data/repositories/timer_repository_impl.dart';
 import 'features/timer/domain/repositories/timer_repository.dart';
@@ -30,18 +29,12 @@ Future<void> main() async {
 
   try {
     // Initialize SharedPreferences first
-    print('Initializing SharedPreferences...');
+    debugPrint('Initializing SharedPreferences...');
     prefs = await SharedPreferences.getInstance();
-    print('SharedPreferences initialized');
-
-    // Initialize notification service
-    print('Initializing notification service...');
-    final notificationService = NotificationService();
-    await notificationService.init();
-    print('Notification service initialized');
+    debugPrint('SharedPreferences initialized');
 
     // Initialize audio service with error handling
-    print('Initializing audio service...');
+    debugPrint('Initializing audio service...');
     audioHandler = await AudioService.init(
       builder: () => AudioPlayerHandler(),
       config: AudioServiceConfig(
@@ -53,29 +46,23 @@ Future<void> main() async {
         androidNotificationIcon: 'mipmap/ic_launcher',
       ),
     );
-    print('Audio service initialized');
+    debugPrint('Audio service initialized');
 
     // Initialize background service
-    print('Initializing background service...');
+    debugPrint('Initializing background service...');
     await BackgroundService.initialize();
-    print('Background service initialized');
+    debugPrint('Background service initialized');
 
     // Initialize repositories
     final timerRepository = TimerRepositoryImpl(audioHandler);
-    print('Repository initialized');
+    debugPrint('Repository initialized');
 
     // Run the app
-    print('Starting app...');
-    runApp(
-      MyApp(
-        timerRepository: timerRepository,
-        audioHandler: audioHandler,
-        notificationService: notificationService,
-      ),
-    );
+    debugPrint('Starting app...');
+    runApp(MyApp(timerRepository: timerRepository, audioHandler: audioHandler));
   } catch (e, stackTrace) {
-    print('Error during initialization: $e');
-    print('Stack trace: $stackTrace');
+    debugPrint('Error during initialization: $e');
+    debugPrint('Stack trace: $stackTrace');
 
     // Run a fallback app
     runApp(
@@ -117,13 +104,11 @@ Future<void> main() async {
 class MyApp extends StatefulWidget {
   final TimerRepository timerRepository;
   final AudioPlayerHandler audioHandler;
-  final NotificationService notificationService;
 
   const MyApp({
     super.key,
     required this.timerRepository,
     required this.audioHandler,
-    required this.notificationService,
   });
 
   @override
@@ -156,7 +141,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    print('Building MyApp...');
+    debugPrint('Building MyApp...');
 
     return MaterialApp(
       title: 'Mindfulness Bell',
@@ -170,11 +155,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         providers: [
           ChangeNotifierProvider(
             create: (_) {
-              print('Creating TimerProvider...');
+              debugPrint('Creating TimerProvider...');
               return TimerProvider(
                 widget.timerRepository,
                 audioHandler: widget.audioHandler,
-                notificationService: widget.notificationService,
               );
             },
           ),
